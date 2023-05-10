@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import Layout from '../components/layout/Layout';
 import MeetupList from '../components/meetups/MeetupList';
 
@@ -18,10 +19,23 @@ const DUMMY_MEETUPS = [
     }
 ]
 
-function HomePage(){
+function HomePage(props){
+
+
     return (
-        <MeetupList meetups={DUMMY_MEETUPS}/>
+        <MeetupList meetups={props.meetups}/>
     )
+}
+// function available only in pages component, approach for data fetching for static pages
+export async function getStaticProps(){
+    // fetch data from an API
+    // we have to return an object, value has to be named 'props'
+    return {
+        props:{
+            // this will be set as props in HomePage component!
+            meetups: DUMMY_MEETUPS
+        }
+    }
 }
 
 export default HomePage;
