@@ -13,7 +13,7 @@ const DUMMY_MEETUPS = [
     {
         id: 'm2',
         title: 'A Second Meetup',
-        image: 'https://www.polska.travel/images/pl-PL/glowne-miasta/gdansk/gdansk_motlawa_1170.jpg',
+        image: 'https://www.polska.travel/wp-content/uploads/2023/01/miasta.jpg',
         address: 'Some address 5, Some City',
         description: "This is a first meetup!"
     }
@@ -34,8 +34,24 @@ export async function getStaticProps(){
         props:{
             // this will be set as props in HomePage component!
             meetups: DUMMY_MEETUPS
-        }
+        },
+        // using when you need automaticly pre-generate page on the server (value in sec - period between each pre-generation)
+        revalidate: 10
     }
 }
+
+// an alternative to getStaticPage function using when you need to update your page on a fly without any delay or you need to work with incoming request (), default chioce should be getStaticProps
+
+// export async function getServerSideProps(context){
+//     const req=context.req;
+//     const res = context.res;
+// // fetch data from ana API
+
+// return {
+//     props:{
+//         meetups: DUMMY_MEETUPS
+//     }
+// }
+// }
 
 export default HomePage;
