@@ -1,15 +1,22 @@
+import Head from "next/head";
 import { MongoClient, ObjectId } from "mongodb";
 import { Fragment } from "react";
 import MeetupDetail from "../../components/meetups/MeetupDetail";
 
 function MeetupDetails(props) {
   return (
-    <MeetupDetail
-      image={props.meetupData.image}
-      title={props.meetupData.title}
-      address={props.meetupData.address}
-      description={props.meetupData.description}
-    />
+    <Fragment>
+      <Head>
+        <title>Meetup Details</title>
+        <meta name="Description" content="Test" />
+      </Head>
+      <MeetupDetail
+        image={props.meetupData.image}
+        title={props.meetupData.title}
+        address={props.meetupData.address}
+        description={props.meetupData.description}
+      />
+    </Fragment>
   );
 }
 
@@ -33,10 +40,8 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps(context) {
-
   // we need getStaticPaths because here (before generating page) next.js doesn't know which params has to be used, getStaticPaths displays all dynamic segment values here all [meetupId]
   const meetupId = context.params.meetupId;
-
 
   // fetch data for a single meetup
   const client = await MongoClient.connect(
@@ -45,7 +50,9 @@ export async function getStaticProps(context) {
   const db = client.db();
   const meetupsCollection = db.collection("meetups");
   // find() gives an access to all meetups from db, first curly brackets is a filter config (here no settings) and the second one define which fields should be extracted (here only id) - so show all items (no filters) but only its id
-  const selectedMeetup = await meetupsCollection.findOne({_id:new ObjectId(meetupId),});
+  const selectedMeetup = await meetupsCollection.findOne({
+    _id: new ObjectId(meetupId),
+  });
   client.close();
 
   return {
