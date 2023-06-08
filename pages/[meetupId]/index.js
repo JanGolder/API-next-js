@@ -1,53 +1,64 @@
+import { MongoClient, ObjectId } from "mongodb";
 import { Fragment } from "react";
 import MeetupDetail from "../../components/meetups/MeetupDetail";
 
-function MeetupDetails() {
+function MeetupDetails(props) {
   return (
     <MeetupDetail
-      image="https://media.istockphoto.com/id/1283481772/pl/zdj%C4%99cie/panorama-gdyni-wyj%C4%99ta-z-powietrza-jesieni%C4%85.jpg?s=612x612&w=0&k=20&c=ODLBdF1GxRr2nCS-b4P8mJyvihmJsT757wfOEZzKWYY="
-      title="A First Meetup"
-      address="Some address 5, Some City"
-      description="This is a first meetup!"
+      image={props.meetupData.image}
+      title={props.meetupData.title}
+      address={props.meetupData.address}
+      description={props.meetupData.description}
     />
   );
 }
 
-export async function getStaticPaths(){
+export async function getStaticPaths() {
+  const client = await MongoClient.connect(
+    "mongodb+srv://kontaktjangolder:y0NXwPOTFRITGFVa@cluster0.tptrjbi.mongodb.net/meetups?retryWrites=true&w=majority"
+  );
+  const db = client.db();
+  const meetupsCollection = db.collection("meetups");
+  // find() gives an access to all meetups from db, first curly brackets is a filter config (here no settings) and the second one define which fields should be extracted (here only id) - so show all items (no filters) but only its id
+  const meetups = await meetupsCollection.find({}, { _id: 1 }).toArray();
+  client.close();
+
   return {
     // if you set to false it means this paths conatins all supported meetupId values, true - next.js try to generate a page for meetupId dynamically on the server for the incoming request
     fallback: false,
-    paths:[
-      {
-        params:{
-          meetupId: 'm1',
-        },
-      },
-      {
-        params:{
-          meetupId: 'm2',
-        },
-      },
-    ]
-  }
+    paths: meetups.map((meetup) => ({
+      params: { meetupId: meetup._id.toString() },
+    })),
+  };
 }
 
-export async function getStaticProps(context){
-  // fetch data for a single meetup
+export async function getStaticProps(context) {
 
   // we need getStaticPaths because here (before generating page) next.js doesn't know which params has to be used, getStaticPaths displays all dynamic segment values here all [meetupId]
   const meetupId = context.params.meetupId;
-  console.log(meetupId);
+
+
+  // fetch data for a single meetup
+  const client = await MongoClient.connect(
+    "mongodb+srv://kontaktjangolder:y0NXwPOTFRITGFVa@cluster0.tptrjbi.mongodb.net/meetups?retryWrites=true&w=majority"
+  );
+  const db = client.db();
+  const meetupsCollection = db.collection("meetups");
+  // find() gives an access to all meetups from db, first curly brackets is a filter config (here no settings) and the second one define which fields should be extracted (here only id) - so show all items (no filters) but only its id
+  const selectedMeetup = await meetupsCollection.findOne({_id:new ObjectId(meetupId),});
+  client.close();
+
   return {
-    props:{
-      meetupData:{
-        image:"https://media.istockphoto.com/id/1283481772/pl/zdj%C4%99cie/panorama-gdyni-wyj%C4%99ta-z-powietrza-jesieni%C4%85.jpg?s=612x612&w=0&k=20&c=ODLBdF1GxRr2nCS-b4P8mJyvihmJsT757wfOEZzKWYY=",
-        id:meetupId,
-        title:"A First Meetup",
-        address:"Some address 5, Some City",
-        description:"This is a first meetup!"
-      }
-    }
-  }
+    props: {
+      meetupData: {
+        id: selectedMeetup._id.toString(),
+        title: selectedMeetup.title,
+        address: selectedMeetup.address,
+        image: selectedMeetup.image,
+        description: selectedMeetup.description,
+      },
+    },
+  };
 }
 
 export default MeetupDetails;
