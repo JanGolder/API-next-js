@@ -31,8 +31,8 @@ export async function getStaticPaths() {
   client.close();
 
   return {
-    // if you set to false it means this paths conatins all supported meetupId values, true - next.js try to generate a page for meetupId dynamically on the server for the incoming request
-    fallback: false,
+    // if you set to false it means this paths conatins all supported meetupId values, true or 'blocking' - next.js try to generate a page for meetupId dynamically on the server for the incoming request (info to next.js that list of paths might not be exhaustive - might by more valid pages), next.js will not respond 404 page when if it can't find the page immediately (it will generate the page on demand), the difference between tru and blocking is that with true it would immediately return an empty page and then pull down the dynamically generated content, in blocking user will not see anything untill the page was pre-generated and the finish page will be served
+    fallback: 'blocking',
     paths: meetups.map((meetup) => ({
       params: { meetupId: meetup._id.toString() },
     })),
